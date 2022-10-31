@@ -48,7 +48,7 @@ export class AuthService {
 
     const token = this.jwtService.sign(payload, {
       secret: 'at-secret',
-      expiresIn: 60 * 60 * 7,
+      expiresIn: 60 * 60 * 24,
     });
 
     return token;
