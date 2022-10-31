@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateUserDto } from 'src/dtos/create-user.dto';
+import { CreateUserDto } from './dtos/create-user.dto';
 import { compareData, hashData } from 'src/helpers/hash-data';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
@@ -14,12 +14,16 @@ export class AuthService {
   ) {}
 
   async register(body: CreateUserDto) {
-    const { username, password } = body;
+    const { username, password, role } = body;
     const userInDb = await this.userRepo.findOne({ where: { username } });
-    if (userInDb) throw new BadRequestException('username in user');
+    if (userInDb) throw new BadRequestException('username in use');
 
     const hashedPasswowrd = await hashData(password);
-    const user = this.userRepo.create({ username, password: hashedPasswowrd });
+    const user = this.userRepo.create({
+      username,
+      password: hashedPasswowrd,
+      role,
+    });
     return this.userRepo.save(user);
   }
 
@@ -31,12 +35,17 @@ export class AuthService {
     const passwordMatch = compareData(password, userInDb.password);
     if (!passwordMatch) throw new BadRequestException('invalid credentials');
 
-    const token = await this.signToken(userInDb.id, userInDb.username);
+    const token = await this.signToken(
+      userInDb.id,
+      userInDb.username,
+      userInDb.role,
+    );
     return { access_token: token };
   }
 
-  async signToken(userId: number, username: string) {
-    const payload = { userId, username };
+  async signToken(userId: number, username: string, role: string) {
+    const payload = { userId, username, role };
+
     const token = this.jwtService.sign(payload, {
       secret: 'at-secret',
       expiresIn: 60 * 60 * 7,
