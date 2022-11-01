@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from './dtos/create-user.dto';
-import { compareData, hashData } from 'src/helpers/hash-data';
+import { compareData, hashData } from 'src/common/helpers/hash-data';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
 
